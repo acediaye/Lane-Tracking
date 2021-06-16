@@ -11,25 +11,24 @@ from library import *
 # imagetest = test_image()
 # plt.imshow(imagetest, cmap='gray')
 # plt.show()
-# hough(imagetest)
+# myimage = hough(imagetest)
 
-image = cv2.imread('pics/test_image.jpg')
-# image = plt.imread('pics/test_image.jpg')
-print(np.shape(image))
-# myimage = (image[:,:,0]+image[:,:,1]+image[:,:,2])/3
+image = plt.imread('pics/test_image.jpg')
+whos(image)
 
 myimage = blackwhite(image)
+# print(myimage)
 whos(myimage)
-# myimage = sobel(myimage)
-# whos(myimage)
-# myimage = region_of_interest(myimage)
-# whos(myimage)
-# myimage = hough(myimage)
-# whos(myimage)
+myimage = sobel(myimage)
+whos(myimage)
+myimage = region_of_interest(myimage)
+whos(myimage)
 
-# cv2.imwrite('pics/mine.jpg', myimage)
-# cv2.imshow('result', myimage)
-# cv2.waitKey(0)
+# plt.imsave('pics/mine.jpg', myimage, cmap='gray')
+# myimage = plt.imread('pics/mine.jpg')
+
+myimage = hough(myimage)
+whos(myimage)
 
 plt.imshow(myimage, cmap='gray')
 plt.show()
