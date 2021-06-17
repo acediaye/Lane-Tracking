@@ -67,10 +67,10 @@ def region_of_interest(image: np.ndarray):
 def test_image():
     image = np.zeros(shape=(1000, 1000), dtype=np.float32)
     for i in range(1000):
-        image[i, i] = 1.0
-        image[500, i] = 1.0
-        image[i, 500] = 1.0
-        image[i, 1000-1-i] = 1.0
+        # image[i, i] = 1.0  # theta -45, rho 0
+        # image[500, i] = 1.0  # theta -90, rho -500
+        # image[i, 500] = 1.0  # theta 0, rho 500
+        image[i, 1000-1-i] = 1.0  # theta 45, rho 706
     return image
 
 
@@ -89,18 +89,18 @@ def ceiling(image: np.ndarray):
 def hough(image: np.ndarray):
     height, width = np.shape(image)
     maxdist = round(np.sqrt(height**2 + width**2))  # max distance
-    thetas = range(-90, 90, 1)  # range of thetas
+    thetas = np.deg2rad(range(-90, 90, 1))  # range of thetas
     rhos = range(-maxdist, maxdist, 1)  # range of rhos
     # print(maxdist)
     accumulator = np.zeros(shape=(len(rhos), len(thetas)), dtype=np.float32)
     count = 0
-    for r in range(height):
-        for c in range(width):
-            if image[r, c] > 0:
+    for y in range(height):
+        for x in range(width):
+            if image[y, x] > 0:
                 # count += 1
                 for i in range(len(thetas)):  # for each theta
-                    rho = (c*np.cos(np.deg2rad(i))
-                           + r*np.sin(np.deg2rad(i)))  # compute rho
+                    rho = (x*np.cos(thetas[i])
+                           + y*np.sin(thetas[i]))  # compute rho
                     accumulator[round(rho)+maxdist, i] += 1  # vote rho x theta
 
     accumulator = normalize(accumulator)
@@ -117,24 +117,25 @@ def hough(image: np.ndarray):
             if value > threshold:  # if > than threshold
                 rho = rhos[r]  # fetch rho
                 theta = thetas[c]  # fetch theta
-                print(f'->rho: {rhos[r]}, theta: {thetas[c]},'
-                      '\trow: {r}, col: {c}')
+                print(f'->rho: {rhos[r]}, theta: {np.rad2deg(thetas[c])},'
+                      f'\trow: {r}, col: {c}')
 
                 if theta == 0:  # for vertical line
                     # x = (width)*[rho]  # list of x
                     y = range(0, height)  # list of y
                     for i in range(height):
                         output[y[i], rho] = 1.0
+                        # image[y[i], rho] = 1.0
                 else:  # any other line
                     x = range(0, width)  # list of x
                     for i in range(width):
-                        y = ((rho-x[i]*np.cos(np.deg2rad(theta)))
-                             / np.sin(np.deg2rad(theta)))  # calc y
-                        y = np.abs(round(y))
-                        print(x[i], y)  # +1278, -1535
+                        y = round((rho-x[i]*np.cos(theta))
+                                  / np.sin(theta))  # calc y
+                        # print(x[i], y)  # +1278, -1535
                         if y >= 0 and y <= height-1:
                             count += 1
                             output[y, x[i]] = 1.0
+                            # image[y, x[i]] = 1.0
 
                 # x = rho*np.cos(np.deg2rad(theta))
                 # y = rho*np.sin(np.deg2rad(theta))

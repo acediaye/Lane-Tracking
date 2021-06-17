@@ -5,13 +5,15 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+# import matplotlib.image as mpimg
 from library import *
 
 # imagetest = test_image()
 # plt.imshow(imagetest, cmap='gray')
 # plt.show()
 # myimage = hough(imagetest)
+# plt.imshow(myimage, cmap='gray')
+# plt.show()
 
 image = plt.imread('pics/test_image.jpg')
 whos(image)
@@ -24,8 +26,8 @@ whos(myimage)
 myimage = region_of_interest(myimage)
 whos(myimage)
 
-# plt.imsave('pics/mine.jpg', myimage, cmap='gray')
-# myimage = plt.imread('pics/mine.jpg')
+# # plt.imsave('pics/mine.jpg', myimage, cmap='gray')
+# # myimage = plt.imread('pics/mine.jpg')
 
 myimage = hough(myimage)
 whos(myimage)
