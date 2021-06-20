@@ -10,12 +10,19 @@ def whos(x: np.ndarray):
 
 
 def blackwhite(image: np.ndarray):
+    """
+    convert 3 channel image to 1 channel image
+    expect image array 0-1
+    """
     output = (image[:, :, 0] + image[:, :, 1] + image[:, :, 2]) / 3
-    # output = output.astype(np.uint8)
     return output
 
 
 def sobel(image: np.ndarray):
+    """
+    sobel edge detector
+    image array 0-1
+    """
     threshold = 1 * 0.5
     Gx = np.array([[-1, 0, 1],
                    [-2, 0, 2],
@@ -30,26 +37,27 @@ def sobel(image: np.ndarray):
         for x in range(1, width-1):
             sum_x = np.sum(Gx*image[y-1:y+2, x-1:x+2])
             sum_y = np.sum(Gy*image[y-1:y+2, x-1:x+2])
-            # print(type(S1), S1)
             mag = round(np.sqrt(sum_x**2 + sum_y**2))
             theta = np.arctan2(sum_y, sum_x)
             if mag >= threshold:
                 output[y, x] = mag
             else:
                 output[y, x] = 0
-    # print(np.amax(output), np.amin(output))
     return output
 
 
 def region_of_interest(image: np.ndarray):
+    """
+    masking image
+    image array 0-1
+    """
     height, width = np.shape(image)
     # p1 = 0, height
     # p2 = width, 0
-    left_slope = (0 - height) / (width - 0)  # neg, + height
+    left_slope = (0 - height) / (width - 0)  # neg
     # p1 = 0, 0
     # p2 = width, height
     right_slope = (height - 0) / (width - 0)  # pos
-    # x = range(width)
     # y1 = left_slope*x + height
     # y2 = right_slope*x
     output = np.zeros(shape=(height, width), dtype=np.float32)
@@ -65,6 +73,9 @@ def region_of_interest(image: np.ndarray):
 
 
 def test_image():
+    """
+    manual test image, scale 0-1
+    """
     image = np.zeros(shape=(1000, 1000), dtype=np.float32)
     for i in range(1000):
         # image[i, i] = 1.0  # theta -45, rho 0
@@ -75,6 +86,9 @@ def test_image():
 
 
 def normalize(image: np.ndarray):
+    """
+    rescale image array into 0-1
+    """
     mymin = np.min(image)
     mymax = np.max(image)
     image = ((image - mymin) / (mymax - mymin))
@@ -82,11 +96,17 @@ def normalize(image: np.ndarray):
 
 
 def ceiling(image: np.ndarray):
+    """
+    rescale image array into 0 or 1
+    """
     image = np.where(image > 0, 1.0, 0.0)
     return image
 
 
 def hough(image: np.ndarray):
+    """
+    hough transform
+    """
     height, width = np.shape(image)
     maxdist = round(np.sqrt(height**2 + width**2))  # max distance
     thetas = np.deg2rad(range(-90, 90, 1))  # range of thetas
@@ -109,6 +129,11 @@ def hough(image: np.ndarray):
 
 def inverse_hough(image: np.ndarray, accumulator: np.ndarray,
                   thetas: np.ndarray, rhos: np.ndarray):
+    """
+    expect image array 0-1
+    uses accumulator to take out rhos and thetas
+    draw lines onto image
+    """
     height, width = np.shape(image)
     threshold = 1 * 0.8
     a_height, a_width = np.shape(accumulator)
@@ -144,12 +169,16 @@ def inverse_hough(image: np.ndarray, accumulator: np.ndarray,
     return image
 
 
-def find_left_right_line(image: np.ndarray, accumulator: np.ndarray,
-                         thetas: np.ndarray, rhos: np.ndarray):
-    height, width = np.shape(image)
+def find_left_right_line(accumulator: np.ndarray, thetas: np.ndarray,
+                         rhos: np.ndarray):
+    """
+    expect image array 0-1
+    uses accumulator to take out rhos and thetas
+    finds negative slope lines and positive slope lines
+    returns left/right line (m, b) tuples
+    """
     a_height, a_width = np.shape(accumulator)
     threshold = 1 * 0.1
-    output = np.zeros(shape=(height, width), dtype=np.float32)
     left_fit = []
     right_fit = []
     for r in range(a_height):
@@ -169,40 +198,32 @@ def find_left_right_line(image: np.ndarray, accumulator: np.ndarray,
                         pass
     print(np.shape(left_fit))  # TODO may be empty
     print(np.shape(right_fit))  # TODO may be empty
-    # print(left_fit)
-    # print(right_fit)
-    average_left_fit = np.average(left_fit, axis=0)
-    average_right_fit = np.average(right_fit, axis=0)
-    print(average_left_fit)
-    print(average_right_fit)
-    lines = []
-    # lines = np.append(lines, average_left_fit)
-    # lines = np.append(lines, average_right_fit)
-    lines.append(average_left_fit)
-    lines.append(average_right_fit)
-    print(np.shape(lines))
-    print(lines)
-    print(lines[0])
+    lines = []  # save (m, b) tuples
+    if len(left_fit) != 0:
+        average_left_fit = np.average(left_fit, axis=0)
+        print(average_left_fit)
+        lines.append(average_left_fit)
+    if len(right_fit) != 0:
+        average_right_fit = np.average(right_fit, axis=0)
+        print(average_right_fit)
+        lines.append(average_right_fit)
     return lines
 
 
 def plot_lines(image: np.ndarray, lines: np.ndarray):
-    height, width = np.shape(image)
+    """
+    expect image array 0-1
+    plot lines with (m, b) tuples
+    """
+    height, width, channels = np.shape(image)
     for line in lines:
         m = line[0]
         b = line[1]
-        y1 = image.shape[0]  # 704
-        y2 = int(y1*(3/5))  # 424
+        y1 = height  # 704
+        y2 = int(y1*(1/2))
         x1 = int((y1 - b)/m)
         x2 = int((y2 - b)/m)
         plt.plot([x1, x2], [y1, y2], 'ro-')
         plt.imshow(image, cmap='gray')
-
-        # m = line[0]
-        # b = line[1]
-        # x = range(0, width)  # list of x
-        # for i in range(width):
-        #     y = m*x[i] + b
-        #     if y >= 0 and y <= height - 1:
-        #         image[y, x[i]] = 1.0
+    plt.show()
     # return image
