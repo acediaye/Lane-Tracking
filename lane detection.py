@@ -19,28 +19,32 @@ image = plt.imread('pics/test_image.jpg')
 whos(image)
 
 myimage = blackwhite(image)
-# print(myimage)
-# whos(myimage)
-# myimage = sobel(myimage)  # slow
-# whos(myimage)
-# myimage = region_of_interest(myimage)
-# whos(myimage)
+# plt.imsave('pics/blackwhite.jpg', myimage, cmap='gray')
+whos(myimage)
+myimage = sobel(myimage)  # slow
+# plt.imsave('pics/sobel.jpg', myimage, cmap='gray')
+whos(myimage)
+myimage = region_of_interest(myimage)
+# plt.imsave('pics/mask.jpg', myimage, cmap='gray')
+whos(myimage)
 
-# # # plt.imsave('pics/mine.jpg', myimage, cmap='gray')
-# # # myimage = plt.imread('pics/mine.jpg')
+# # plt.imsave('pics/mine.jpg', myimage, cmap='gray')
+# # myimage = plt.imread('pics/mine.jpg')
 
-# accumulator, thetas, rhos = hough(myimage)  # slow
-# myimage = inverse_hough(myimage, accumulator, thetas, rhos)
-# whos(myimage)
-# find_left_right_line(myimage, accumulator, thetas, rhos)
+accumulator, thetas, rhos = hough(myimage)  # slow
+myimage = inverse_hough(myimage, accumulator, thetas, rhos)
+# plt.imsave('pics/inverse.jpg', myimage, cmap='gray')
+whos(myimage)
+lines = find_left_right_line(myimage, accumulator, thetas, rhos)
+myimage = plot_lines(myimage, lines)
 
-p1 = [1309, 704]
-p2 = [1176, 422]
-pp1 = [817, 704]
-pp2 = [929, 422]
-plt.plot([1309, 1176], [704, 422], 'ro-')
-plt.plot([817, 929], [704, 422], 'go-')
-plt.imshow(myimage, cmap='gray')
+# p1 = [1309, 704]
+# p2 = [1176, 422]
+# pp1 = [817, 704]
+# pp2 = [929, 422]
+# plt.plot([1309, 1176], [704, 422], 'ro-')
+# plt.plot([817, 929], [704, 422], 'go-')
+# plt.imshow(myimage, cmap='gray')
 plt.show()
 
 # m1, b1 = [-2.11442821e+00, -2.06536814e+03]  # 14

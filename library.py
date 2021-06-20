@@ -121,38 +121,45 @@ def inverse_hough(image: np.ndarray, accumulator: np.ndarray,
                 theta = thetas[c]  # fetch theta
                 print(f'->rho: {rhos[r]}, theta: {np.rad2deg(thetas[c])},'
                       f'\trow: {r}, col: {c}')
-
+                if rho*np.cos(theta) != 0 and np.sin(theta) != 0:  # divide 0
+                    m = round(-np.cos(theta) / np.sin(theta), 10)
+                    y_intercept = round(rho / np.sin(theta), 10)
+                    print(f'-->{m}, {y_intercept}')
                 if theta == 0:  # for vertical line
                     y = range(0, height)  # list of y
                     for i in range(height):
-                        output[y[i], rho] = 1.0
+                        # output[y[i], rho] = 1.0
+                        image[y[i], rho] = 1.0
                 else:  # any other line
                     x = range(0, width)  # list of x
                     for i in range(width):
                         y = round((rho-x[i]*np.cos(theta))
                                   / np.sin(theta))  # calc y
                         if y >= 0 and y <= height-1:
-                            output[y, x[i]] = 1.0
+                            # output[y, x[i]] = 1.0
+                            image[y, x[i]] = 1.0
     # plt.imshow(output, cmap='gray')
     # plt.show()
-    return output
+    # return output
+    return image
 
 
 def find_left_right_line(image: np.ndarray, accumulator: np.ndarray,
                          thetas: np.ndarray, rhos: np.ndarray):
     height, width = np.shape(image)
     a_height, a_width = np.shape(accumulator)
+    threshold = 1 * 0.1
     output = np.zeros(shape=(height, width), dtype=np.float32)
     left_fit = []
     right_fit = []
     for r in range(a_height):
         for c in range(a_width):
             value = accumulator[r, c]  # at each point
-            if value > 0:
+            if value > threshold:
                 rho = rhos[r]  # fetch rho
                 theta = thetas[c]  # fetch theta
                 if rho*np.cos(theta) != 0 and np.sin(theta) != 0:  # divide 0
-                    m = round((rho*np.sin(theta)) / (rho*np.cos(theta)), 10)
+                    m = round(-np.cos(theta) / np.sin(theta), 10)
                     y_intercept = round(rho / np.sin(theta), 10)
                     if m < 0:  # left line has neg slope
                         left_fit.append((m, y_intercept))
@@ -160,9 +167,42 @@ def find_left_right_line(image: np.ndarray, accumulator: np.ndarray,
                         right_fit.append((m, y_intercept))
                     else:
                         pass
-    print(np.shape(left_fit))
-    print(np.shape(right_fit))
+    print(np.shape(left_fit))  # TODO may be empty
+    print(np.shape(right_fit))  # TODO may be empty
+    # print(left_fit)
+    # print(right_fit)
     average_left_fit = np.average(left_fit, axis=0)
     average_right_fit = np.average(right_fit, axis=0)
     print(average_left_fit)
     print(average_right_fit)
+    lines = []
+    # lines = np.append(lines, average_left_fit)
+    # lines = np.append(lines, average_right_fit)
+    lines.append(average_left_fit)
+    lines.append(average_right_fit)
+    print(np.shape(lines))
+    print(lines)
+    print(lines[0])
+    return lines
+
+
+def plot_lines(image: np.ndarray, lines: np.ndarray):
+    height, width = np.shape(image)
+    for line in lines:
+        m = line[0]
+        b = line[1]
+        y1 = image.shape[0]  # 704
+        y2 = int(y1*(3/5))  # 424
+        x1 = int((y1 - b)/m)
+        x2 = int((y2 - b)/m)
+        plt.plot([x1, x2], [y1, y2], 'ro-')
+        plt.imshow(image, cmap='gray')
+
+        # m = line[0]
+        # b = line[1]
+        # x = range(0, width)  # list of x
+        # for i in range(width):
+        #     y = m*x[i] + b
+        #     if y >= 0 and y <= height - 1:
+        #         image[y, x[i]] = 1.0
+    # return image
