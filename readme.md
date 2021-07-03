@@ -20,6 +20,26 @@ Transforms x, y space into rho, theta space to represent lines. Each point in x,
 Boosted values to see what the accumulator looks like\
 ![alt text](pics/accumulator.png)
 
+## Equations
+basic equations
+```bash
+cos(theta) = x/r
+sin(theta) = y/r
+x^2 + y^2 = r^2
+```
+convert cartesian coordinates x and y into polar coordinates r and theta
+```bash
+r^2 = x(rcos(theta)) + y(rsin(theta))
+r = xcos(theta) + ysin(theta)
+```
+convert polar coordinates back into cartesian coordinates
+```bash
+x(rcos(theta)) + y(rsin(theta)) = r^2
+xcos(theta) + ysin(theta) = r
+y = -xcos(theta)/sin(theta) + r/sin(theta)
+y = mx + b
+```
+
 ## Inverse Hough Transform
 The rho, theta with the most votes are the largest lines in x, y coordinates. With each rho, theta pair, can draw lines back in x, y space.\
 ![alt text](pics/inverse.jpg)
